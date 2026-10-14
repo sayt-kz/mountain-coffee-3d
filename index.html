@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TAU ROAST</title>
+<meta name="description" content="TAU ROAST — горная арабика, обжаренная в Алматы. Демо-сайт.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Marck+Script&family=Oswald:wght@500;600;700&display=swap">
+<style>
+/* Layout: фиксированная 3D-сцена на карамельном фоне под тремя экранами, дальше светлые и тёмные «листы» наезжают поверх */
+:root {
+  --caramel: #e9a031;
+  --caramel-deep: #d9861c;
+  --espresso: #3a1d10;
+  --espresso-2: #2a140b;
+  --cream: #fff6e8;
+  --latte: #f6e3c4;
+  --gold: #c9a24e;
+  --ink-60: rgba(58, 29, 16, .66);
+  --line: rgba(58, 29, 16, .16);
+  --cream-60: rgba(255, 246, 232, .68);
+  --cream-line: rgba(255, 246, 232, .18);
+  --word: rgba(255, 246, 232, .34);
+  --danger: #b3261e;
+  --danger-on-dark: #ffb4a6;
+
+  --f-display: "Oswald", "Arial Narrow", Impact, sans-serif;
+  --f-script: "Marck Script", "Segoe Script", cursive;
+  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  --gutter: clamp(16px, 4.5vw, 64px);
+  --header-h: 68px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--caramel); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  background: var(--caramel);
+  color: var(--espresso);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--espresso); outline-offset: 3px; border-radius: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mono { font-family: var(--f-mono); }
+
+/* ---------- Фон и 3D-слои ---------- */
+#bg { position: fixed; inset: 0; z-index: 0; background: var(--caramel); overflow: hidden; }
+#bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(110, 48, 6, .28) 100%);
+}
+#glow {
+  position: absolute; left: 0; top: 0;
+  width: min(86vmin, 820px); aspect-ratio: 1; max-width: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 222, 160, .85) 0%, rgba(255, 200, 110, .38) 34%, rgba(255, 190, 90, 0) 68%);
+  transform: translate(62vw, 50vh) translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.stage { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#stage { z-index: 1; }
+#fg { z-index: 2; filter: blur(7px); }
+.no-3d .stage { display: none; }
+
+/* ---------- Шапка ---------- */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; align-items: center; gap: 28px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) var(--gutter) 14px;
+  color: var(--espresso);
+  transition: background-color .35s ease, color .35s ease, box-shadow .35s ease;
+}
+.site-header.is-dark {
+  background: rgba(42, 20, 11, .94);
+  color: var(--cream);
+  box-shadow: 0 10px 30px rgba(42, 20, 11, .25);
+}
+@supports (backdrop-filter: blur(8px)) { .site-header.is-dark { background: rgba(42, 20, 11, .82); backdrop-filter: blur(12px); } }
+.logo { display: inline-flex; align-items: baseline; gap: 4px; text-decoration: none; line-height: 1; }
+.logo-tau { font-family: var(--f-script); font-size: 30px; transform: translateY(2px) rotate(-4deg); display: inline-block; }
+.logo-roast { font-family: var(--f-display); font-weight: 700; font-size: 22px; letter-spacing: .08em; }
+.nav { display: flex; gap: 26px; margin-left: auto; }
+.nav a { text-decoration: none; font-weight: 600; font-size: 15px; position: relative; padding-block: 4px; }
+.nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 0; height: 2px; background: currentColor; transition: right .25s ease; }
+.nav a:hover::after { right: 0; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 48px; padding: 0 24px; border-radius: 999px;
+  font-family: var(--f-body); font-weight: 700; font-size: 15px; text-decoration: none;
+  border: 2px solid var(--espresso); cursor: pointer;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-dark { background: var(--espresso); color: var(--cream); }
+.btn-dark:hover { background: var(--espresso-2); }
+.btn-outline { background: transparent; color: var(--espresso); }
+.btn-outline:hover { background: var(--espresso); color: var(--cream); }
+.site-header .btn { min-height: 40px; padding: 0 18px; font-size: 14px; border-color: currentColor; color: inherit; }
+.site-header .btn:hover { background: var(--espresso); color: var(--cream); border-color: var(--espresso); }
+.site-header.is-dark .btn:hover { background: var(--cream); color: var(--espresso); border-color: var(--cream); }
+
+/* ---------- Экраны со сценой ---------- */
+.screen {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  padding: calc(var(--header-h) + 40px) var(--gutter) 56px;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+.content { position: relative; z-index: 2; min-width: 0; }
+
+.s1 .content { width: min(48vw, 640px); }
+.kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 18px; color: var(--espresso); }
+h1 {
+  margin: 0; font-family: var(--f-display); font-weight: 700; text-transform: uppercase;
+  font-size: clamp(54px, 8.6vw, 140px); line-height: .9; letter-spacing: -.005em;
+  color: var(--cream);
+  text-shadow: 0 2px 30px rgba(140, 62, 0, .18);
+}
+h1 .ln { display: block; }
+h1 .ln-dark { color: var(--espresso); text-shadow: none; }
+.script-line { font-family: var(--f-script); font-size: clamp(26px, 2.6vw, 38px); line-height: 1.2; margin: 22px 0 30px; transform: rotate(-2deg); transform-origin: left; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.scroll-hint {
+  position: absolute; left: var(--gutter); bottom: 22px; margin: 0; z-index: 2;
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+}
+.scroll-hint::after { content: ""; width: 1px; height: 28px; background: var(--espresso); transform-origin: top; }
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-hint::after { animation: drip 1.8s ease-in-out infinite; }
+  @keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+  .s1 .kicker, h1 .ln, .s1 .script-line, .s1 .actions { animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
+  h1 .ln:nth-child(1) { animation-delay: .08s; }
+  h1 .ln:nth-child(2) { animation-delay: .16s; }
+  h1 .ln:nth-child(3) { animation-delay: .24s; }
+  .s1 .script-line { animation-delay: .36s; }
+  .s1 .actions { animation-delay: .44s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(28px); } }
+}
+
+.eyebrow { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; margin: 0 0 14px; }
+.display { font-family: var(--f-display); font-weight: 700; text-transform: uppercase; line-height: .95; margin: 0; text-wrap: balance; }
+.s2 { justify-content: flex-end; }
+.s2 .content { width: min(44vw, 560px); }
+.s2 h2 { font-size: clamp(44px, 6vw, 96px); }
+.s2 h2 span { color: var(--cream); display: block; }
+.s2 p.lead { font-size: clamp(16px, 1.25vw, 19px); max-width: 62ch; margin: 24px 0 26px; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; font-size: 13px; letter-spacing: .04em; }
+.facts li { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+.facts li:last-child { border-bottom: 1px solid var(--line); }
+.facts b { font-weight: 500; }
+
+.s3 { justify-content: center; }
+.bigword {
+  position: absolute; z-index: 0; left: 0; right: 0; top: 50%; margin: -.58em 0 0;
+  display: flex; justify-content: center;
+  font-family: var(--f-script); font-size: clamp(130px, 25vw, 440px); line-height: 1;
+  color: var(--word); white-space: nowrap; pointer-events: none; user-select: none;
+}
+.stats { width: 100%; display: grid; grid-template-columns: 1fr minmax(260px, 34vw) 1fr; grid-template-rows: auto auto; row-gap: 64px; }
+.stat { display: flex; flex-direction: column; gap: 6px; }
+.stat:nth-child(1) { grid-column: 1; grid-row: 1; }
+.stat:nth-child(2) { grid-column: 1; grid-row: 2; }
+.stat:nth-child(3) { grid-column: 3; grid-row: 1; text-align: right; align-items: flex-end; }
+.stat:nth-child(4) { grid-column: 3; grid-row: 2; text-align: right; align-items: flex-end; }
+.stat .num { font-family: var(--f-mono); font-weight: 500; font-size: clamp(36px, 4.4vw, 68px); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat .num small { font-size: .45em; letter-spacing: 0; margin-left: .2em; }
+.stat .lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; max-width: 22ch; }
+
+/* ---------- Листы с обычными блоками ---------- */
+.sheet { position: relative; z-index: 3; padding-block: clamp(72px, 10vw, 136px); padding-inline: var(--gutter); }
+.wrap { max-width: 1200px; margin: 0 auto; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 40px; margin-bottom: clamp(36px, 5vw, 64px); }
+.sec-head h2 { font-size: clamp(40px, 5.4vw, 80px); }
+.sec-head p { max-width: 46ch; margin: 0; color: var(--ink-60); }
+.script-accent { font-family: var(--f-script); text-transform: none; font-weight: 400; color: var(--caramel-deep); letter-spacing: 0; }
+
+#formats {
+  background: var(--cream);
+  border-radius: clamp(24px, 4vw, 44px) clamp(24px, 4vw, 44px) 0 0;
+  box-shadow: 0 -30px 70px rgba(80, 34, 6, .28);
+}
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.fcard { background: var(--latte); border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.fcard figure { margin: 0; height: 220px; border-radius: 16px; background: radial-gradient(circle at 50% 60%, var(--caramel) 0%, var(--caramel-deep) 100%); display: grid; place-items: center; position: relative; overflow: hidden; }
+.fcard figure svg { height: 74%; width: auto; filter: drop-shadow(0 18px 18px rgba(58, 29, 16, .3)); }
+.fcard .tag { position: absolute; left: 14px; top: 14px; font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; background: var(--cream); padding: 4px 10px; border-radius: 999px; }
+.fcard h3 { font-family: var(--f-display); font-weight: 600; text-transform: uppercase; font-size: 30px; line-height: 1; margin: 6px 0 0; }
+.dims { font-family: var(--f-mono); font-size: 13px; color: var(--ink-60); margin: 0; font-variant-numeric: tabular-nums; }
+.fcard p.desc { margin: 0; font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.chips li { font-size: 12px; font-weight: 700; letter-spacing: .04em; border: 1.5px solid var(--espresso); border-radius: 999px; padding: 3px 10px; }
+.fcard .price { margin-top: auto; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; align-items: baseline; }
+.price b { font-family: var(--f-mono); font-weight: 500; font-size: 22px; font-variant-numeric: tabular-nums; }
+.price span { font-size: 13px; color: var(--ink-60); }
+
+#quality { background: var(--latte); }
+.qgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--espresso); }
+.qcard { padding: 28px 24px 8px 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.qcard + .qcard { padding-left: 24px; border-left: 1px solid var(--line); }
+.qicon { width: 56px; height: 56px; border-radius: 50%; background: var(--espresso); color: var(--caramel); display: grid; place-items: center; }
+.qicon svg { width: 28px; height: 28px; }
+.qcard h3 { font-family: var(--f-display); font-weight: 600; text-transform: uppercase; font-size: 24px; line-height: 1.05; margin: 8px 0 0; }
+.qcard p { margin: 0; font-size: 15px; color: var(--ink-60); }
+
+#partner { background: var(--espresso); color: var(--cream); }
+#partner .sec-head p { color: var(--cream-60); }
+#partner :focus-visible { outline-color: var(--caramel); }
+.pgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+.terms { list-style: none; margin: 0; padding: 0; }
+.terms li { display: grid; grid-template-columns: 9.5ch 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid var(--cream-line); align-items: baseline; }
+.terms li:last-child { border-bottom: 1px solid var(--cream-line); }
+.terms .k { font-family: var(--f-mono); font-size: 22px; color: var(--caramel); white-space: nowrap; }
+.terms b { display: block; font-size: 18px; margin-bottom: 4px; }
+.terms span.t { color: var(--cream-60); font-size: 15px; }
+
+.form { background: var(--espresso-2); border: 1px solid var(--cream-line); border-radius: 24px; padding: clamp(20px, 3vw, 36px); display: grid; gap: 18px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.field input[type="text"], .field input[type="tel"] {
+  width: 100%; min-height: 52px; padding: 0 16px; border-radius: 12px;
+  border: 1.5px solid var(--cream-line); background: rgba(255, 246, 232, .06); color: var(--cream);
+  font: 500 16px var(--f-body);
+}
+.field input::placeholder { color: rgba(255, 246, 232, .4); }
+.field input:focus { outline: none; border-color: var(--caramel); }
+.field input[aria-invalid="true"] { border-color: var(--danger-on-dark); }
+.hint { margin: 0; font-size: 14px; color: var(--danger-on-dark); }
+.consent { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--cream-60); cursor: pointer; }
+.consent input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--caramel); flex: none; }
+.demo-note { display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--caramel); font-size: 14px; color: var(--cream); }
+.demo-note b { font-family: var(--f-mono); font-weight: 500; color: var(--caramel); font-size: 12px; letter-spacing: .1em; padding-top: 2px; }
+.form .btn { background: var(--caramel); border-color: var(--caramel); color: var(--espresso); width: 100%; min-height: 54px; font-size: 16px; }
+.form .btn:hover { background: var(--cream); border-color: var(--cream); }
+.status { margin: 0; padding: 14px 16px; border-radius: 12px; background: rgba(233, 160, 49, .14); border: 1px solid var(--caramel); font-size: 15px; }
+
+.site-footer { position: relative; z-index: 3; background: var(--espresso-2); color: var(--cream); padding: 40px var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 40px); }
+.foot { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 20px 40px; }
+.foot .nav { margin-left: 0; flex-wrap: wrap; gap: 10px 24px; }
+.foot .nav a { font-size: 14px; }
+.foot-note { flex-basis: 100%; margin: 8px 0 0; padding-top: 20px; border-top: 1px solid var(--cream-line); font-family: var(--f-mono); font-size: 12px; color: var(--cream-60); letter-spacing: .04em; }
+
+/* ---------- Планшет и телефон ---------- */
+@media (max-width: 1080px) {
+  .qgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qcard:nth-child(3) { padding-left: 0; border-left: 0; }
+  .qcard:nth-child(n+3) { border-top: 1px solid var(--line); margin-top: 20px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards .fcard:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  :root { --header-h: 60px; }
+  .nav { display: none; }
+  .site-header { justify-content: space-between; }
+  .logo-tau { font-size: 26px; }
+  .logo-roast { font-size: 19px; }
+
+  .screen { align-items: flex-start; padding-top: calc(var(--header-h) + 24px); }
+  .s1 .content { width: 100%; }
+  h1 { font-size: clamp(50px, 15vw, 78px); }
+  .script-line { margin: 14px 0 20px; }
+  .btn { min-height: 46px; padding: 0 20px; }
+  .scroll-hint { display: none; }
+
+  .s2 { align-items: flex-end; }
+  .s2 .content { width: 100%; }
+  .s2 h2 { font-size: clamp(38px, 11vw, 60px); }
+  .s2 p.lead { margin: 16px 0 18px; font-size: 15px; }
+
+  .s3 { align-items: flex-end; }
+  .bigword { font-size: 31vw; top: 42%; }
+  .stats { grid-template-columns: 1fr 1fr; row-gap: 22px; column-gap: 16px; }
+  .stat:nth-child(n) { grid-column: auto; grid-row: auto; text-align: left; align-items: flex-start; }
+  .stat .num { font-size: clamp(30px, 9vw, 44px); }
+  .stat .lbl { font-size: 11px; }
+
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .fcard figure { height: 190px; }
+  .qgrid { grid-template-columns: minmax(0, 1fr); }
+  .qcard, .qcard + .qcard { padding: 24px 0 4px; border-left: 0; }
+  .qcard:nth-child(n+2) { border-top: 1px solid var(--line); margin-top: 16px; }
+  .pgrid { grid-template-columns: minmax(0, 1fr); }
+  .terms li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+</style>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div id="glow"></div></div>
+<canvas id="stage" class="stage" aria-hidden="true"></canvas>
+<canvas id="fg" class="stage" aria-hidden="true"></canvas>
+
+<header class="site-header" id="header">
+  <a class="logo" href="#s1" aria-label="TAU ROAST, наверх"><span class="logo-tau">Tau</span><span class="logo-roast">ROAST</span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="#roast">Обжарка</a>
+    <a href="#formats">Форматы</a>
+    <a href="#quality">Качество</a>
+    <a href="#partner">Контакты</a>
+  </nav>
+  <a class="btn btn-outline" href="#partner">Для кофеен</a>
+</header>
+
+<main>
+  <section class="screen s1" id="s1" aria-labelledby="h1">
+    <div class="content">
+      <p class="kicker">Спешелти-обжарщик · Алматы</p>
+      <h1 id="h1"><span class="ln">Кофе</span><span class="ln">с высоты</span><span class="ln ln-dark">1&nbsp;800&nbsp;м</span></h1>
+      <p class="script-line">Горная арабика, обжаренная в Алматы</p>
+      <div class="actions">
+        <a class="btn btn-dark" href="#formats">Выбрать кофе <span aria-hidden="true">→</span></a>
+        <a class="btn btn-outline" href="#partner">Для кофеен</a>
+      </div>
+    </div>
+    <p class="scroll-hint mono" aria-hidden="true">Листайте</p>
+  </section>
+
+  <section class="screen s2" id="roast" aria-labelledby="roast-h">
+    <div class="content">
+      <p class="eyebrow mono">Обжарка</p>
+      <h2 class="display" id="roast-h"><span>12 килограммов</span> за раз</h2>
+      <p class="lead">Мы обжариваем маленькими партиями на барабанном ростере. Каждую партию пробуем на каппинге, прежде чем она уедет к вам. Зерно приходит через 3 дня после обжарки, пока аромат на пике.</p>
+      <ul class="facts mono">
+        <li><span>Ростер</span><b>барабанный, 12 кг</b></li>
+        <li><span>Дни обжарки</span><b>вторник и пятница</b></li>
+        <li><span>От ростера до чашки</span><b>3 дня</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen s3" id="s3" aria-labelledby="s3-h">
+    <p class="bigword" aria-hidden="true">Арабика</p>
+    <h2 class="sr-only" id="s3-h">Арабика TAU ROAST в цифрах</h2>
+    <div class="content stats">
+      <div class="stat"><span class="num">1&nbsp;800<small>м</small></span><span class="lbl">высота плантаций</span></div>
+      <div class="stat"><span class="num">84</span><span class="lbl">балла по шкале SCA</span></div>
+      <div class="stat"><span class="num">12<small>кг</small></span><span class="lbl">одна партия обжарки</span></div>
+      <div class="stat"><span class="num">3<small>дня</small></span><span class="lbl">от обжарки до чашки</span></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="formats" aria-labelledby="formats-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow mono">Форматы</p>
+          <h2 class="display" id="formats-h">Кофе <span class="script-accent">в любой</span> упаковке</h2>
+        </div>
+        <p>Один и тот же лот в трёх видах: для дома, для кофейни и в дорогу. Зерно или помол на выбор.</p>
+      </div>
+      <div class="cards">
+        <article class="fcard">
+          <figure>
+            <span class="tag">для дома</span>
+            <svg viewBox="0 0 120 150" aria-hidden="true">
+              <rect x="22" y="10" width="76" height="16" rx="4" fill="#c9a24e"/>
+              <rect x="20" y="22" width="80" height="6" rx="2" fill="#a77d34"/>
+              <rect x="24" y="28" width="72" height="108" fill="#f4e2c2"/>
+              <rect x="24" y="28" width="72" height="14" fill="#3a1d10"/>
+              <rect x="24" y="122" width="72" height="14" fill="#3a1d10"/>
+              <rect x="24" y="44" width="72" height="2" fill="#c9a24e"/>
+              <ellipse cx="60" cy="68" rx="8" ry="11" fill="#3a1d10" transform="rotate(20 60 68)"/>
+              <rect x="34" y="86" width="52" height="8" rx="1" fill="#3a1d10"/>
+              <rect x="40" y="100" width="40" height="5" rx="1" fill="#c98a4b"/>
+              <rect x="22" y="136" width="76" height="6" rx="2" fill="#a77d34"/>
+            </svg>
+          </figure>
+          <h3>Банка 250 г</h3>
+          <p class="dims">Ø 84 × 128 мм · 250 г нетто</p>
+          <ul class="chips"><li>зерно</li><li>молотый</li><li>латунная крышка</li></ul>
+          <p class="desc">Плотная крышка держит аромат. Пустую банку можно наполнить снова.</p>
+          <div class="price"><b>6 900 ₸</b><span>≈ 25 чашек</span></div>
+        </article>
+        <article class="fcard">
+          <figure>
+            <span class="tag">для кофеен</span>
+            <svg viewBox="0 0 120 150" aria-hidden="true">
+              <path d="M28 18h64l8 124H20z" fill="#b98a55"/>
+              <path d="M28 18h64l1 14H27z" fill="#9c6f3e"/>
+              <rect x="36" y="56" width="48" height="58" rx="2" fill="#3a1d10"/>
+              <rect x="42" y="66" width="36" height="6" fill="#f4e2c2"/>
+              <rect x="46" y="78" width="28" height="12" fill="#e9a031"/>
+              <rect x="42" y="98" width="36" height="3" fill="#c9a24e"/>
+              <circle cx="60" cy="42" r="5" fill="#3a1d10"/>
+              <circle cx="60" cy="42" r="2" fill="#b98a55"/>
+            </svg>
+          </figure>
+          <h3>Пакет 1 кг</h3>
+          <p class="dims">190 × 340 мм · 1 000 г нетто</p>
+          <ul class="chips"><li>опт</li><li>клапан дегазации</li><li>зип-замок</li></ul>
+          <p class="desc">Крафт с клапаном, чтобы зерно дышало. Удобно держать у кофемашины.</p>
+          <div class="price"><b>22 500 ₸</b><span>от 5 кг дешевле</span></div>
+        </article>
+        <article class="fcard">
+          <figure>
+            <span class="tag">в дорогу</span>
+            <svg viewBox="0 0 140 150" aria-hidden="true">
+              <rect x="14" y="40" width="70" height="96" rx="4" fill="#3a1d10"/>
+              <rect x="20" y="58" width="58" height="4" fill="#c9a24e"/>
+              <rect x="24" y="72" width="50" height="10" fill="#f4e2c2"/>
+              <rect x="24" y="90" width="30" height="5" fill="#e9a031"/>
+              <path d="M70 26h50v86H70z" fill="#fff6e8"/>
+              <path d="M70 26h50v10H70z" fill="#e8d2ab"/>
+              <path d="M74 40l-8 20h10zM116 40l8 20h-10z" fill="#e8d2ab"/>
+              <ellipse cx="95" cy="72" rx="6" ry="9" fill="#3a1d10" transform="rotate(20 95 72)"/>
+              <rect x="80" y="92" width="30" height="4" fill="#3a1d10"/>
+            </svg>
+          </figure>
+          <h3>Дрип-пакеты 10 × 12 г</h3>
+          <p class="dims">коробка 120 × 160 × 60 мм · 10 шт.</p>
+          <ul class="chips"><li>молотый</li><li>под кружку</li><li>в офис</li></ul>
+          <p class="desc">Повесили на край кружки, залили кипятком, через три минуты кофе готов.</p>
+          <div class="price"><b>4 900 ₸</b><span>490 ₸ за чашку</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" id="quality" aria-labelledby="quality-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow mono">Качество</p>
+          <h2 class="display" id="quality-h">Почему это <span class="script-accent">вкусно</span></h2>
+        </div>
+        <p>Вкус в чашке зависит от четырёх вещей. Мы контролируем каждую.</p>
+      </div>
+      <div class="qgrid">
+        <article class="qcard">
+          <span class="qicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.6 3.2 5 5.3 5 10a5 5 0 0 1-10 0c0-2.4 1.3-3.8 2.4-4.8.2 1.6.9 2.7 2 3.2C11 9 10.8 5.6 12 3z"/></svg></span>
+          <h3>Свежая обжарка</h3>
+          <p>Обжариваем дважды в неделю. На банке стоит дата обжарки, а не только срок годности.</p>
+        </article>
+        <article class="qcard">
+          <span class="qicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="6.2" ry="8.6" transform="rotate(28 12 12)"/><path d="M8.6 5.6c3.6 2 .8 6.4 6.8 12.8" /></svg></span>
+          <h3>Спешелти-зерно</h3>
+          <p>Берём лоты от 84 баллов SCA. Каждую партию пробуем на каппинге.</p>
+        </article>
+        <article class="qcard">
+          <span class="qicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="18" r="2.2"/><circle cx="18.5" cy="6" r="2.2"/><path d="M7.5 17h6a3 3 0 0 0 0-6h-3a3 3 0 0 1 0-6h6" stroke-dasharray="2.5 2.5"/></svg></span>
+          <h3>Прямые поставки</h3>
+          <p>Покупаем у кооперативов Эфиопии напрямую. Знаем ферму, высоту и год урожая.</p>
+        </article>
+        <article class="qcard">
+          <span class="qicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 12l4-3"/><path d="M12 4v2M20 12h-2M12 20v-2M4 12h2"/></svg></span>
+          <h3>Помол под вас</h3>
+          <p>Смелем под турку, гейзер, фильтр или эспрессо. Или оставим зерном.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" id="partner" aria-labelledby="partner-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow mono">Для кофеен</p>
+          <h2 class="display" id="partner-h">Стать <span class="script-accent">партнёром</span></h2>
+        </div>
+        <p>Поставляем зерно кофейням, офисам и ресторанам Алматы. Подберём лот под ваше меню.</p>
+      </div>
+      <div class="pgrid">
+        <ul class="terms">
+          <li><span class="k">от 5 кг</span><div><b>Оптовые цены</b><span class="t">Скидка растёт с объёмом, фиксируем цену на квартал.</span></div></li>
+          <li><span class="k">бесплатно</span><div><b>Дегустация для бариста</b><span class="t">Приедем с образцами и настроим помол под вашу кофемашину.</span></div></li>
+          <li><span class="k">1 день</span><div><b>Доставка по Алматы</b><span class="t">Привезём на следующий день после обжарки.</span></div></li>
+        </ul>
+
+        <form class="form" id="lead" novalidate>
+          <div class="field">
+            <label for="f-name">Имя</label>
+            <input type="text" id="f-name" name="name" autocomplete="name" placeholder="Айгерим" aria-describedby="e-name">
+            <p class="hint" id="e-name" hidden>Напишите, как к вам обращаться.</p>
+          </div>
+          <div class="field">
+            <label for="f-phone">Телефон</label>
+            <input type="tel" id="f-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+7 700 000 00 00" aria-describedby="e-phone">
+            <p class="hint" id="e-phone" hidden>Укажите телефон: не меньше 10 цифр.</p>
+          </div>
+          <div class="field">
+            <label for="f-company">Кофейня или компания</label>
+            <input type="text" id="f-company" name="company" autocomplete="organization" placeholder="Необязательно">
+          </div>
+          <div class="field">
+            <label class="consent" for="f-consent"><input type="checkbox" id="f-consent" name="consent" aria-describedby="e-consent"> Согласен на обработку персональных данных</label>
+            <p class="hint" id="e-consent" hidden>Без согласия мы не сможем принять заявку.</p>
+          </div>
+          <p class="demo-note"><b>ДЕМО</b><span>Это демонстрационный сайт. Заявка никуда не отправляется.</span></p>
+          <button class="btn" type="submit" id="f-submit">Оставить заявку</button>
+          <p class="status" id="f-status" role="status" hidden></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="foot">
+    <a class="logo" href="#s1" aria-label="TAU ROAST, наверх"><span class="logo-tau">Tau</span><span class="logo-roast">ROAST</span></a>
+    <nav class="nav" aria-label="Разделы в подвале">
+      <a href="#roast">Обжарка</a>
+      <a href="#formats">Форматы</a>
+      <a href="#quality">Качество</a>
+      <a href="#partner">Контакты</a>
+    </nav>
+    <p class="foot-note">Демо-сайт · бренд выдуман · сделано Мансуром с помощью вайб-кодинга</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobileMQ = matchMedia('(max-width: 760px)');
+  const isMobile = mobileMQ.matches || (matchMedia('(pointer: coarse)').matches && innerWidth < 1024);
+  const TAU = Math.PI * 2;
+
+  /* ================= Интерфейс: шапка и форма ================= */
+  const header = document.getElementById('header');
+  const formats = document.getElementById('formats');
+  function onScroll() {
+    header.classList.toggle('is-dark', formats.getBoundingClientRect().top <= header.offsetHeight);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+
+  const form = document.getElementById('lead');
+  const fields = {
+    name: { el: document.getElementById('f-name'), hint: document.getElementById('e-name'), ok: el => el.value.trim().length >= 2 },
+    phone: { el: document.getElementById('f-phone'), hint: document.getElementById('e-phone'), ok: el => el.value.replace(/\D/g, '').length >= 10 },
+    consent: { el: document.getElementById('f-consent'), hint: document.getElementById('e-consent'), ok: el => el.checked }
+  };
+  const status = document.getElementById('f-status');
+  function check(f) {
+    const ok = f.ok(f.el);
+    f.hint.hidden = ok;
+    f.el.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    return ok;
+  }
+  Object.values(fields).forEach(f => {
+    const ev = f.el.type === 'checkbox' ? 'change' : 'input';
+    f.el.addEventListener(ev, () => { if (!f.hint.hidden) check(f); status.hidden = true; });
+  });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let first = null;
+    Object.values(fields).forEach(f => { if (!check(f) && !first) first = f.el; });
+    if (first) { first.focus(); status.hidden = true; return; }
+    const name = fields.name.el.value.trim();
+    status.textContent = name + ', заявка заполнена верно. Это демо, поэтому она никуда не ушла. На рабочем сайте здесь будет отправка в Telegram или WhatsApp.';
+    status.hidden = false;
+  });
+
+  /* ================= 3D ================= */
+  const hasGL = (() => {
+    try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+    catch (e) { return false; }
+  })();
+
+  // «Пульт управления»: GSAP меняет эти числа, сцена рисует банку по ним
+  const state = { nx: .46, ny: 0, s: 1, rx: .08, ry: -.45, rz: -.26, spread: 1, lift: 0, glow: 1 };
+  const intro = { v: reduce ? 0 : 1 };
+
+  // Положение банки на каждом экране: nx/ny в долях половины экрана
+  const poses = {
+    desktop: [
+      { nx: .45, ny: -.02, s: 1.05, rx: .08, ry: -.45, rz: -.26, spread: 1, lift: 0, glow: 1 },
+      { nx: -.45, ny: 0, s: 1.05, rx: .05, ry: -.3 + TAU, rz: .14, spread: 1.25, lift: 0, glow: .9 },
+      { nx: 0, ny: .02, s: 1.2, rx: .04, ry: TAU, rz: 0, spread: 1.55, lift: 0, glow: 1 },
+      { nx: 0, ny: 2.5, s: 1.2, rx: .35, ry: TAU + 1.1, rz: -.25, spread: 2.1, lift: 3.2, glow: 0 }
+    ],
+    mobile: [
+      { nx: 0, ny: -.5, s: .62, rx: .1, ry: -.4, rz: -.2, spread: 1, lift: 0, glow: 1 },
+      { nx: 0, ny: .42, s: .6, rx: .05, ry: -.3 + TAU, rz: .12, spread: 1.15, lift: 0, glow: .9 },
+      { nx: 0, ny: .1, s: .74, rx: .04, ry: TAU, rz: 0, spread: 1.3, lift: 0, glow: 1 },
+      { nx: 0, ny: 2.8, s: .74, rx: .3, ry: TAU + 1, rz: -.2, spread: 1.8, lift: 3, glow: 0 }
+    ]
+  };
+  Object.assign(state, (mobileMQ.matches ? poses.mobile : poses.desktop)[0]);
+
+
+  function rand(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  /* ---------- Этикетка: рисуем на скрытом холсте ---------- */
+  const ESP = '#3a1d10', GOLD = '#c9a24e', PAPER = '#f4e2c2', CREAM = '#fff6e8';
+  function spaced(ctx, text, x, y, sp) {
+    const chars = Array.from(text);
+    const ws = chars.map(c => ctx.measureText(c).width);
+    const w = ws.reduce((a, b) => a + b, 0) + sp * (chars.length - 1);
+    let cx = x - w / 2;
+    ctx.textAlign = 'left';
+    chars.forEach((c, i) => { ctx.fillText(c, cx, y); cx += ws[i] + sp; });
+    return w;
+  }
+  function drawLabel(canvas) {
+    const W = 2048, H = 1024;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const r = rand(17);
+    ctx.textBaseline = 'alphabetic';
+
+    // бумага и фактура
+    ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 26000; i++) {
+      const a = r() * .07;
+      ctx.fillStyle = r() < .55 ? `rgba(110,62,24,${a})` : `rgba(255,255,255,${a * 1.4})`;
+      ctx.fillRect(r() * W, r() * H, 1 + r() * 2, 1 + r() * 2);
+    }
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 420; i++) {
+      const x = r() * W, y = r() * H, l = 10 + r() * 40, ang = r() * Math.PI;
+      ctx.strokeStyle = `rgba(120,78,40,${.04 + r() * .05})`;
+      ctx.beginPath(); ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x + Math.cos(ang) * l * .5 + r() * 6, y + Math.sin(ang) * l * .5, x + Math.cos(ang) * l, y + Math.sin(ang) * l);
+      ctx.stroke();
+    }
+
+    // тёмные полосы с золотой линией
+    const band = 128;
+    ctx.fillStyle = ESP; ctx.fillRect(0, 0, W, band); ctx.fillRect(0, H - band, W, band);
+    ctx.fillStyle = GOLD; ctx.fillRect(0, band + 12, W, 6); ctx.fillRect(0, H - band - 18, W, 6);
+    ctx.fillStyle = 'rgba(201,162,78,.5)'; ctx.fillRect(0, band + 24, W, 2); ctx.fillRect(0, H - band - 26, W, 2);
+    ctx.fillStyle = CREAM;
+    ctx.font = '500 26px "JetBrains Mono", monospace';
+    const top = 'TAU ROAST   ·   АЛМАТЫ   ·   43°15′ N  76°57′ E   ·   ';
+    const bot = 'СПЕШЕЛТИ КОФЕ   ·   250 Г   ·   ЗЕРНО   ·   ';
+    ctx.textAlign = 'left';
+    let tw = ctx.measureText(top).width, x = -60;
+    while (x < W) { ctx.fillText(top, x, 76); x += tw; }
+    tw = ctx.measureText(bot).width; x = -200;
+    while (x < W) { ctx.fillText(bot, x, H - 52); x += tw; }
+
+    // ЛИЦЕВАЯ СТОРОНА (u = 0.25)
+    const fx = 512;
+    // горы: Tau по-казахски «гора»
+    ctx.strokeStyle = GOLD; ctx.lineWidth = 7; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    const ridge = [[310, 330], [370, 290], [400, 305], [460, 236], [500, 272], [540, 222], [600, 290], [640, 270], [714, 330]];
+    ridge.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.stroke();
+    ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(290, 342); ctx.lineTo(734, 342); ctx.stroke();
+    // зерно-солнце над хребтом
+    ctx.save(); ctx.translate(fx, 214); ctx.rotate(.45);
+    ctx.fillStyle = ESP; ctx.beginPath(); ctx.ellipse(0, 0, 26, 38, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = PAPER; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, -31); ctx.bezierCurveTo(15, -10, -15, 10, 0, 31); ctx.stroke();
+    ctx.restore();
+    // название
+    ctx.fillStyle = ESP;
+    ctx.save(); ctx.translate(fx, 478); ctx.rotate(-.05);
+    ctx.font = '176px "Marck Script", cursive'; ctx.textAlign = 'center'; ctx.fillText('Tau', 0, 0);
+    ctx.restore();
+    ctx.font = '700 150px "Oswald", "Arial Narrow", sans-serif';
+    spaced(ctx, 'ROAST', fx, 628, 16);
+    // лента
+    ctx.font = '800 30px "Manrope", sans-serif';
+    const rib = 'ГОРНАЯ АРАБИКА · ЭФИОПИЯ';
+    const chars = Array.from(rib);
+    const rw = chars.reduce((a, c) => a + ctx.measureText(c).width, 0) + 6 * (chars.length - 1) + 70;
+    const ry = 688, rh = 60, n = 26;
+    ctx.fillStyle = ESP;
+    ctx.beginPath();
+    ctx.moveTo(fx - rw / 2 - n, ry - rh / 2); ctx.lineTo(fx + rw / 2 + n, ry - rh / 2); ctx.lineTo(fx + rw / 2, ry);
+    ctx.lineTo(fx + rw / 2 + n, ry + rh / 2); ctx.lineTo(fx - rw / 2 - n, ry + rh / 2); ctx.lineTo(fx - rw / 2, ry); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = CREAM; spaced(ctx, rib, fx, ry + 11, 6);
+    ctx.fillStyle = 'rgba(58,29,16,.72)';
+    ctx.font = '500 24px "JetBrains Mono", monospace';
+    spaced(ctx, 'ОБЖАРЕНО В АЛМАТЫ · ПАРТИЯ 12 КГ', fx, 790, 3);
+    // печать 250 г
+    ctx.save(); ctx.translate(fx + 290, 250); ctx.rotate(-.2);
+    ctx.strokeStyle = ESP; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 70, 0, TAU); ctx.stroke();
+    ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(0, 0, 58, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = ESP; ctx.textAlign = 'center';
+    ctx.font = '600 44px "Oswald", sans-serif'; ctx.fillText('250 г', 0, 12);
+    ctx.font = '500 16px "JetBrains Mono", monospace'; ctx.fillText('НЕТТО', 0, 40);
+    ctx.restore();
+
+    // ОБОРОТ (u = 0.75): вкус и шкала обжарки
+    const bx = 1536;
+    ctx.fillStyle = ESP;
+    ctx.font = '600 54px "Oswald", sans-serif';
+    spaced(ctx, 'ВКУС', bx, 262, 12);
+    ctx.fillStyle = GOLD; ctx.fillRect(bx - 50, 284, 100, 4);
+    ctx.fillStyle = ESP; ctx.textAlign = 'center';
+    ctx.font = '74px "Marck Script", cursive';
+    ['шоколад', 'вишня', 'карамель'].forEach((w, i) => ctx.fillText(w, bx, 372 + i * 76));
+    ctx.font = '500 24px "JetBrains Mono", monospace';
+    spaced(ctx, 'ОБЖАРКА', bx, 624, 6);
+    const segs = ['#e8c48e', '#c98a4b', '#9a5a2c', '#6b3519', '#3a1d10'];
+    const sw = 78, gap = 10, sx = bx - (segs.length * sw + (segs.length - 1) * gap) / 2;
+    segs.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(sx + i * (sw + gap), 650, sw, 28); });
+    const mx = sx + 2 * (sw + gap) + sw / 2;
+    ctx.fillStyle = ESP; ctx.beginPath(); ctx.moveTo(mx - 12, 638); ctx.lineTo(mx + 12, 638); ctx.lineTo(mx, 650); ctx.closePath(); ctx.fill();
+    ctx.font = '500 20px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left'; ctx.fillText('СВЕТЛАЯ', sx, 708);
+    ctx.textAlign = 'right'; ctx.fillText('ТЁМНАЯ', sx + segs.length * sw + (segs.length - 1) * gap, 708);
+    ctx.fillStyle = 'rgba(58,29,16,.72)';
+    ctx.font = '500 24px "JetBrains Mono", monospace';
+    spaced(ctx, '1 800 М · 84 SCA · ЭФИОПИЯ', bx, 790, 3);
+
+    // бок: штрихкод
+    ctx.fillStyle = ESP;
+    let bxx = 978;
+    while (bxx < 1070) { const w = 2 + Math.floor(r() * 5); if (r() > .35) ctx.fillRect(bxx, 600, w, 130); bxx += w + 2; }
+    ctx.font = '500 18px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('4 870231 120417', 1024, 760);
+    return canvas;
+  }
+
+  /* ---------- Зерно: шар → сплющиваем → бороздка ---------- */
+  function beanGeometry() {
+    const g = new THREE.SphereGeometry(1, 64, 40);
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      let x = p.getX(i) * .68, y = p.getY(i), z = p.getZ(i) * .5;
+      x *= 1 - .07 * y;
+      if (z < 0) {
+        z *= .32;                                   // плоская сторона
+        const x0 = .1 * Math.sin(y * 2.6);          // изогнутая линия бороздки
+        const w = .07 + .025 * (1 - Math.abs(y));
+        const d = Math.abs(x - x0);
+        if (d < w) { const k = 1 - (d / w) * (d / w); z += k * .13 * (1 - Math.pow(Math.abs(y), 3)); }
+      }
+      p.setXYZ(i, x, y, z);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+
+  /* ---------- Невидимая фотостудия ---------- */
+  function softbox(scene, w, h, pos, intensity, color) {
+    const m = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+    m.color.multiplyScalar(intensity);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
+    mesh.position.set(pos[0], pos[1], pos[2]);
+    mesh.lookAt(0, 0, 0);
+    scene.add(mesh);
+  }
+  function buildEnv(renderer) {
+    const env = new THREE.Scene();
+    env.add(new THREE.Mesh(new THREE.SphereGeometry(30, 32, 16), new THREE.MeshBasicMaterial({ color: 0x3b200f, side: THREE.BackSide })));
+    softbox(env, 10, 5, [0, 8, 5], 3.4, 0xfff1dc);   // верхний ключевой
+    softbox(env, 3, 12, [-9, 1, 4], 2.4, 0xffe2b8);  // левая полоса
+    softbox(env, 3, 12, [9, 0, 3], 1.7, 0xffd29a);   // правая полоса
+    softbox(env, 14, 4, [0, -8, 3], .7, 0xe9a031);   // карамельный отсвет снизу
+    softbox(env, 8, 8, [0, 2, -10], 1.2, 0xffc77a);  // контровой
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const tex = pmrem.fromScene(env, .02).texture;
+    pmrem.dispose();
+    return tex;
+  }
+
+  function makeBeanMats() {
+    return [0x5b2f17, 0x472210, 0x6e3d1d].map(c => new THREE.MeshPhysicalMaterial({
+      color: c, roughness: .36, clearcoat: .8, clearcoatRoughness: .22, envMapIntensity: 1.05
+    }));
+  }
+
+  let renderer, scene, camera, can, orbit, beans = [], fg = null;
+  let halfW = 1, halfH = 1, fit = 1, lastW = 0, lastH = 0;
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  const glowEl = document.getElementById('glow');
+
+  function init3D() {
+    const canvas = document.getElementById('stage');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isMobile ? 1.5 : 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.setClearColor(0x000000, 0);
+    renderer.physicallyCorrectLights = true;
+
+    scene = new THREE.Scene();
+    scene.environment = buildEnv(renderer);
+    camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, .1, 100);
+    camera.position.set(0, 0, 10);
+    const key = new THREE.DirectionalLight(0xfff0dc, 1.6); key.position.set(4, 5, 6); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffc27a, 1.2); rim.position.set(-5, 2, -4); scene.add(rim);
+    scene.add(new THREE.AmbientLight(0xffe7c7, .25));
+
+    // банка
+    const labelCanvas = drawLabel(document.createElement('canvas'));
+    const labelTex = new THREE.CanvasTexture(labelCanvas);
+    labelTex.encoding = THREE.sRGBEncoding;
+    labelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    can = new THREE.Group();
+    can.rotation.order = 'XZY'; // сначала оборот вокруг своей оси, потом наклон
+    const body = new THREE.Mesh(
+      new THREE.CylinderGeometry(.9, .9, 2.4, 96, 1, true, Math.PI * 1.5, TAU),
+      new THREE.MeshPhysicalMaterial({ map: labelTex, roughness: .58, clearcoat: .35, clearcoatRoughness: .45, envMapIntensity: .85 })
+    );
+    can.add(body);
+    const brass = new THREE.MeshPhysicalMaterial({ color: 0xc4924a, metalness: 1, roughness: .24, clearcoat: .4, clearcoatRoughness: .18, envMapIntensity: 1.25, side: THREE.DoubleSide });
+    const V = (a) => a.map(q => new THREE.Vector2(q[0], q[1]));
+    const lid = new THREE.Mesh(new THREE.LatheGeometry(V([[.9, -.01], [.925, 0], [.94, .04], [.94, .22], [.925, .27], [.88, .295], [.8, .3], [0, .3]]), 96), brass);
+    lid.position.y = 1.2; can.add(lid);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.6, .014, 10, 96), brass);
+    ring.rotation.x = Math.PI / 2; ring.position.y = 1.502; can.add(ring);
+    const bottom = new THREE.Mesh(new THREE.LatheGeometry(V([[0, -.16], [.8, -.16], [.91, -.15], [.93, -.1], [.925, 0], [.9, .01]]), 96), brass);
+    bottom.position.y = -1.2; can.add(bottom);
+    scene.add(can);
+
+    // зёрна вокруг
+    const beanGeo = beanGeometry();
+    const mats = makeBeanMats();
+    orbit = new THREE.Group(); scene.add(orbit);
+    const r = rand(42), N = isMobile ? 14 : 26;
+    for (let i = 0; i < N; i++) {
+      const m = new THREE.Mesh(beanGeo, mats[i % 3]);
+      m.scale.setScalar(.13 + r() * .09);
+      m.rotation.set(r() * TAU, r() * TAU, r() * TAU);
+      orbit.add(m);
+      beans.push({
+        m, a0: i / N * TAU + (r() - .5) * .4, r: 1.55 + r() * 1.6, z: -1.6 + r() * 2.9,
+        sp: (.04 + r() * .08) * (r() < .5 ? -1 : 1), bf: .6 + r() * .8, ph: r() * TAU,
+        rv: new THREE.Vector3((r() - .5) * 1.4, (r() - .5) * 1.4, (r() - .5) * 1.4), lf: .5 + r()
+      });
+    }
+
+    // размытые зёрна переднего плана (только компьютер)
+    if (!isMobile) {
+      const fr = new THREE.WebGLRenderer({ canvas: document.getElementById('fg'), antialias: false, alpha: true });
+      fr.setPixelRatio(.6);
+      fr.outputEncoding = THREE.sRGBEncoding;
+      fr.toneMapping = THREE.ACESFilmicToneMapping;
+      fr.setClearColor(0x000000, 0);
+      const fs = new THREE.Scene();
+      fs.environment = buildEnv(fr);
+      const fk = new THREE.DirectionalLight(0xfff0dc, 1.4); fk.position.set(4, 5, 6); fs.add(fk);
+      fs.add(new THREE.AmbientLight(0xffe7c7, .3));
+      const fgeo = beanGeometry(), fm = makeBeanMats();
+      const spots = [
+        { nx: -.86, ny: .56, z: 5.6 }, { nx: .9, ny: -.62, z: 6.1 }, { nx: -.66, ny: -.88, z: 6.6 },
+        { nx: .74, ny: .84, z: 5.2 }, { nx: .12, ny: -1.12, z: 6.3 }
+      ];
+      const items = spots.map((s, i) => {
+        const m = new THREE.Mesh(fgeo, fm[i % 3]);
+        m.scale.setScalar(.34 + r() * .1);
+        m.rotation.set(r() * TAU, r() * TAU, r() * TAU);
+        fs.add(m);
+        return Object.assign(s, { m, rv: new THREE.Vector3((r() - .5) * .6, (r() - .5) * .6, (r() - .5) * .6), ph: r() * TAU });
+      });
+      fg = { renderer: fr, scene: fs, items, canvas: document.getElementById('fg') };
+    }
+
+    // перерисовать этикетку, когда шрифты загрузятся
+    if (document.fonts && document.fonts.load) {
+      Promise.all([
+        document.fonts.load('700 150px "Oswald"', 'ROAST ВКУС'),
+        document.fonts.load('600 54px "Oswald"', 'ВКУС 250 г'),
+        document.fonts.load('176px "Marck Script"', 'Tau шоколад вишня карамель'),
+        document.fonts.load('500 24px "JetBrains Mono"', 'ОБЖАРКА TAU'),
+        document.fonts.load('800 30px "Manrope"', 'ГОРНАЯ АРАБИКА')
+      ]).then(() => { drawLabel(labelCanvas); labelTex.needsUpdate = true; }).catch(() => {});
+    }
+
+    if (!reduce) {
+      addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch') return;
+        mouse.tx = e.clientX / innerWidth * 2 - 1;
+        mouse.ty = e.clientY / innerHeight * 2 - 1;
+      }, { passive: true });
+    }
+    addEventListener('resize', resize);
+    resize(true);
+    requestAnimationFrame(frame);
+  }
+
+  function resize(force) {
+    const w = innerWidth, h = innerHeight;
+    if (force !== true && w === lastW && Math.abs(h - lastH) < 120) return;
+    lastW = w; lastH = h;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    halfH = Math.tan(THREE.MathUtils.degToRad(17.5)) * 10;
+    halfW = halfH * camera.aspect;
+    fit = mobileMQ.matches ? Math.min(1.25, Math.max(.85, camera.aspect / .46)) : Math.min(1, Math.max(.6, camera.aspect / 1.55));
+    if (fg) fg.renderer.setSize(w, h, false);
+  }
+
+  const v3 = new THREE.Vector3();
+  let last = 0;
+  // Главный цикл: рисует кадр примерно 60 раз в секунду
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const t = now / 1000, dt = Math.min(.05, t - last || .016); last = t;
+    const p = scrollY / innerHeight;           // 0 = экран 1, 3 = блок «Форматы»
+    if (p > 3.3) return;                       // сцена закрыта листами, не рисуем
+
+    mouse.x += (mouse.tx - mouse.x) * .05;
+    mouse.y += (mouse.ty - mouse.y) * .05;
+    const sway = reduce ? 0 : 1;
+    const iv = intro.v;
+    const s = state.s * fit;
+
+    const baseX = state.nx * halfW, baseY = state.ny * halfH;
+    can.position.set(baseX, baseY + Math.sin(t * 1.1) * .07 * sway - iv * 2.2, 0);
+    can.scale.setScalar(s);
+    can.rotation.set(
+      state.rx + mouse.y * .12 + Math.sin(t * .7) * .03 * sway,
+      state.ry + mouse.x * .32 + Math.sin(t * .45) * .1 * sway - iv * 2.4,
+      state.rz + Math.sin(t * .9) * .025 * sway
+    );
+
+    orbit.position.set(baseX, baseY - iv * 1.2, 0);
+    orbit.scale.setScalar(s);
+    const spread = state.spread * (1 + iv * .9);
+    for (const b of beans) {
+      const a = b.a0 + t * b.sp * sway;
+      const rr = b.r * spread;
+      b.m.position.set(
+        Math.cos(a) * rr * 1.18,
+        Math.sin(a) * rr * .82 + Math.sin(t * b.bf + b.ph) * .12 * sway + state.lift * b.lf,
+        b.z * (.7 + spread * .3)
+      );
+      if (sway) { b.m.rotation.x += b.rv.x * dt; b.m.rotation.y += b.rv.y * dt; b.m.rotation.z += b.rv.z * dt; }
+    }
+    renderer.render(scene, camera);
+
+    // тёплое свечение за банкой
+    v3.set(baseX, baseY, 0).project(camera);
+    glowEl.style.transform = `translate(${(v3.x * .5 + .5) * innerWidth}px, ${(-v3.y * .5 + .5) * innerHeight}px) translate(-50%, -50%) scale(${(.6 + s * .4).toFixed(3)})`;
+    glowEl.style.opacity = state.glow.toFixed(3);
+
+    if (fg) {
+      const op = Math.max(0, Math.min(1, 1 - (p - 1.9) / .7)) * (1 - iv);
+      fg.canvas.style.opacity = op.toFixed(3);
+      if (op > 0) {
+        for (const it of fg.items) {
+          const hh = Math.tan(THREE.MathUtils.degToRad(17.5)) * (10 - it.z), ww = hh * camera.aspect;
+          it.m.position.set(it.nx * ww + Math.sin(t * .3 + it.ph) * .08 * sway, it.ny * hh + p * hh * .9 + Math.cos(t * .4 + it.ph) * .08 * sway, it.z);
+          if (sway) { it.m.rotation.x += it.rv.x * dt; it.m.rotation.y += it.rv.y * dt; }
+        }
+        fg.renderer.render(fg.scene, camera);
+      }
+    }
+  }
+
+  /* ================= Прокрутка (GSAP + ScrollTrigger) ================= */
+  function setupScroll() {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    if (!reduce) gsap.to(intro, { v: 0, duration: 1.8, ease: 'power3.out', delay: .1 });
+
+    const mm = gsap.matchMedia();
+    mm.add({ mobile: '(max-width: 760px)', desktop: '(min-width: 761px)' }, ctx => {
+      const P = ctx.conditions.mobile ? poses.mobile : poses.desktop;
+      gsap.set(state, P[0]);
+      const tl = gsap.timeline({
+        defaults: { ease: 'power1.inOut', duration: 1 },
+        scrollTrigger: { trigger: '#s1', start: 'top top', endTrigger: '#formats', end: 'top top', scrub: reduce ? true : 1.1 }
+      });
+      tl.to(state, Object.assign({}, P[1]), 0)
+        .to('#bg', { backgroundColor: '#e2932a', ease: 'none' }, 0)
+        .to(state, Object.assign({}, P[2]), 1)
+        .to('#bg', { backgroundColor: '#d9861c', ease: 'none' }, 1)
+        .to(state, Object.assign({}, P[3], { ease: 'power2.in' }), 2);
+
+      gsap.fromTo('.bigword', { xPercent: 14 }, {
+        xPercent: -14, ease: 'none',
+        scrollTrigger: { trigger: '#s3', start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+    });
+  }
+
+  /* ================= Запуск ================= */
+  if (!window.THREE || !hasGL) {
+    document.documentElement.classList.add('no-3d');
+  } else {
+    try { init3D(); } catch (err) { console.warn('3D отключено:', err); document.documentElement.classList.add('no-3d'); }
+  }
+  setupScroll();
+})();
+</script>
+
+</body>
+</html>
